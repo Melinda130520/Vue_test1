@@ -3,7 +3,9 @@
 		<!-- 头部 -->
 		<div class="app-head">
 			<div class="app-head-inner">
-				<img src="../assets/logo.png">
+				<router-link :to="{path: '/'}">
+					<img src="../assets/logo.png">
+				</router-link>
 				<div class="head-nav">
 					<ul class="nav-list"> 
 						<li> {{ username }}</li>
@@ -191,6 +193,8 @@
 	  	background: #e3e4e8;
 	  	clear: both;
 	  	margin-top: 30px;
+	  	/*position: absolute;*/
+	  	/*bottom: 0;*/
 	}
 	.container {
 	  	width: 1200px;
