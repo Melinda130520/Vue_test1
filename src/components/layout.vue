@@ -1,37 +1,94 @@
 <template>
 	<div>
+		<!-- 头部 -->
 		<div class="app-head">
 			<div class="app-head-inner">
 				<img src="../assets/logo.png">
 				<div class="head-nav">
 					<ul class="nav-list"> 
-						<li>登录</li>
+						<li> {{ username }}</li>
+			            <li v-if="username !== ''" class="nav-pile">|</li>
+			            <li v-if="username !== ''" @click="quit">退出</li>
+			            <li v-if="username === ''" @click="logClick">登录</li>
+						<li v-if="username === ''" class="nav-pile">|</li>
+						<li v-if="username === ''" @click="regClick">注册</li>
 						<li class="nav-pile">|</li>
-						<li>注册</li>
-						<li class="nav-pile">|</li>
-						<li>关于</li>
+						<li @click="aboutClick">关于</li>
 					</ul>
-				</div>
+				</div> 
 			</div>
 		</div>
+
+		<!-- 中间内容框 -->
 		<div class="app-content">
 			<keep-alive>
 				 <router-view></router-view>
 			</keep-alive>
 		</div>
+
+		<!-- 页脚 -->
 		<div class="app-foot">
 			<p>© 2016 fishenal MIT</p>
 		</div>
+		
+		<!-- dialog组件 - 关于 -->
+		<my-dialog :isShow="isShowAboutDialog" @on-close="closeDialog('isShowAboutDialog')">
+			<p>about us</p>
+		</my-dialog>
+
+		<!-- dialog组件 - 登录  -->
+		<my-dialog :isShow="isShowLogDialog" @on-close="closeDialog('isShowLogDialog')">
+			<log-form @has-log="onSuccessLog"></log-form>
+		</my-dialog>
+
+		<!-- dialog组件 - 注册  -->
+		<my-dialog :isShow="isShowRegDialog" @on-close="closeDialog('isShowRegDialog')">
+			<reg-form></reg-form>
+		</my-dialog>
+
 	</div>
 </template>
 
 
 <script type="text/javascript">
-	
+
+	import Dialog from './dialog'                  //引入dialog组件
+	import LogForm from './logForm'                //引入登录组件
+	import RegForm from './regForm'			       //引入注册组件
+
 	export default{
+		components: {
+		    MyDialog: Dialog,                       //dialog组件注册
+		    LogForm,                                //登录组件
+		    RegForm                                 //注册组件
+		},
 		data (){
 			return {
-
+				isShowAboutDialog : false ,        //dialog的显示隐藏
+				isShowLogDialog : false,		   //登录的对话框隐藏
+				isShowRegDialog : false,		   //注册的对话框
+				username : ""					   //用户名
+			}
+		},
+		methods : {
+			aboutClick (){			               //点击关于出现dialog
+				this.isShowAboutDialog = true
+			},
+			closeDialog (attr){                    //关闭dialog对话框
+				this[attr] = false 
+			},
+			logClick (){                           //登录点击
+				this.isShowLogDialog = true
+			},
+			regClick (){                           //注册点击 
+				this.isShowRegDialog = true
+			},
+			onSuccessLog (data){                   // 登录成功
+				this.closeDialog ('isShowLogDialog')
+				this.username = data.username
+			},
+			quit (){                               //退出登录
+				this.username = ""
 			}
 		}
 	}
