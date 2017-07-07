@@ -1,12 +1,80 @@
 <template>
-	<div>hello world {{x}}</div>
+	<!-- 一个组件就只能有一个根节点 -->
+	<div class="slide-show" @mouseover="clearInv" @mouseout="runInv">
+		<div class="slide-img">
+			<a :href="slides[nowIndex].href">
+				<transition name="slide-trans">
+		          	<img v-if="isShow" :src="slides[nowIndex].src">
+		        </transition>
+		        <transition name="slide-trans-old">
+		          	<img v-if="!isShow" :src="slides[nowIndex].src">
+		        </transition>
+			</a>
+		</div>
+		<h2>{{slides[nowIndex].title}}</h2>
+		<!-- 轮播顺序显示 -->
+		<ul class="slide-pages"> 
+			<li @click="goto(prevIndex)">&lt;</li>
+			<li v-for="(item,index) in slides" @click="goto(index)">
+				<a :class="{on : index == nowIndex}">{{ index + 1 }}</a>
+			</li>
+			<li @click="goto(nextIndex)">&gt;</li>
+		</ul> 
+	</div>
 </template>
 
 <script type="text/javascript">
 	export default {
+		props : {             //获取父组件传进来的参数
+			slides : {
+				type : Array,
+				default : []
+			},
+			inv: {            //父组件传进来的定时参数
+		      	type: Number,
+		      	default: 1000
+		    }
+		},
+		computed : {
+			prevIndex (){     // 前一页的索引
+				if (this.nowIndex === 0) {
+					return this.slides.length - 1
+				}else{
+					return this.nowIndex - 1
+				}
+			},
+			nextIndex (){      // 后一页的索引
+				if (this.nowIndex === this.slides.length - 1) {
+					return 0
+				}else{
+					return this.nowIndex + 1
+				}
+			}
+		},
 		data (){
 			return {
-				x : 1
+				nowIndex : 0,  //当前页码
+				isShow : true  //轮播动画显示隐藏
+			}
+		},
+		mounted (){
+			this.runInv()      //执行定时
+		},
+		methods : {
+			goto (index) {     // 跳转到第几页
+				setTimeout(() => {
+				    this.isShow = true
+				    this.nowIndex = index
+				    this.$emit('onchange',index)
+				}, 10)
+			},
+			runInv (){         //轮播定时
+				this.invId = setInterval(() => {
+			        this.goto(this.nextIndex)
+			    }, this.inv)
+			},
+			clearInv (){       //清楚轮播定时
+				clearInterval(this.invId);
 			}
 		}
 	}
@@ -14,5 +82,57 @@
 
 
 <style scoped>
-	
+	/*动画*/
+	.slide-trans-enter-active {
+	  	transition: all .5s;
+	}
+	/*transition配合transform使用，要是使用left是没有效果的*/
+	.slide-trans-enter {
+	  	transform: translateX(900px);
+	}
+	.slide-trans-old-leave-active {
+	  	transition: all .5s;
+	  	transform: translateX(-900px);
+	}
+	.slide-show {
+	  	position: relative;
+	  	margin: 15px 15px 15px 0;
+	  	width: 900px;
+	  	height: 500px;
+	  	overflow: hidden;
+	}
+	.slide-show h2 {
+	  	position: absolute;
+	  	width: 100%;
+	  	height: 100%;
+	  	color: #fff;
+	  	background: #000;
+	  	opacity: .5;
+	  	bottom: 0;
+	  	height: 30px;
+	  	text-align: left;
+	  	padding-left: 15px;
+	}
+	.slide-img {
+	  	width: 100%;
+	}
+	.slide-img img {
+	  	width: 100%;
+	  	position: absolute;
+	  	top: 0;
+	}
+	.slide-pages {
+	  	position: absolute;
+	  	bottom: 10px;
+	  	right: 15px;
+	}
+	.slide-pages li {
+	  	display: inline-block;
+	  	padding: 0 10px;
+	  	cursor: pointer;
+	  	color: #fff;
+	}
+	.slide-pages li .on {
+	  	text-decoration: underline;
+	}
 </style>

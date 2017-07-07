@@ -29,7 +29,9 @@
 		<!-- 首页右侧 -->
 		<div class="index-right">
 			<!-- 轮播组件 -->
-			<slide-show :slides="slides" :inv="invTime"></slide-show>
+			<slide-show :slides="slides" :inv="invTime" @onchange="doSomeThing"></slide-show>
+
+			<!-- 产品列表 -->
 			<div class="index-board-lis t">
 				<div 
 					class="index-board-item" 
@@ -49,14 +51,18 @@
 </template>
 
 <script type="text/javascript">
+
+	// 轮播组件引入
 	import slideShow from '../components/slideShow'
+
 	export default{
-		components : {
-			slideShow
+		components : {           //组件注册
+			slideShow            //轮播组件
 		},
-		created: function () {
-			// params表示请求参数
-		    this.$http.get('api/getNewsList',  {
+
+		created: function () { 
+
+		    this.$http.get('api/getNewsList',  {      // params表示请求参数
 		    	params: {userId : 123}
 		    }).then((res) => {
 		      	this.newsList = res.data
@@ -74,10 +80,11 @@
 		},
 		data () {
 		    return {
-		      	invTime: 2000,
-		      	slides: [
+		      	invTime: 2000,             //轮播定时
+		      	slides: [           	   //轮播参数
 			        {
-			          	src: require('../assets/slideShow/pic1.jpg'),
+			          	src: require('../assets/slideShow/pic1.jpg'),   
+			          	//通过JS引入的需要使用require引用
 			          	title: 'xxx1',
 			          	href: 'detail/analysis'
 			        },
@@ -97,7 +104,7 @@
 			          href: 'detail/forecast'
 			        }
 		      	],
-		      	boardList: [
+		      	boardList: [               //产品列表描述
 			        {
 			          	title: '开放产品',
 			          	description: '开放产品是一款开放产品',
@@ -127,9 +134,9 @@
 			          	saleout: false
 			        }
 		      	],
-		      	newsList: [
+		      	newsList: [                //最新新闻，通过ajax向后台请求
 		      	],
-		      	productList: {
+		      	productList: {             //分类
 			        pc: {
 			          	title: 'PC产品',
 			          	list: [
@@ -177,6 +184,11 @@
 		        	}
 		      	}
 		    }
+		},
+		methods : {
+			doSomeThing (){      //轮播的goto方法引用的时候触发，子组件的自定义事件传给父组件
+				console.info("您正在进行轮播跳页哦")
+			}
 		}
 	}
 </script>
