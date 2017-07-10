@@ -10,7 +10,7 @@
                     购买数量：
                 </div>
                 <div class="sales-board-line-right">
-                    <v-counter @on-change=""></v-counter>
+                    <v-counter @on-change="onParamChange('buyNum', $event)"></v-counter>
                 </div>
             </div>
             <div class="sales-board-line">
@@ -19,7 +19,7 @@
                 </div>
                 <div class="sales-board-line-right">
                     <!-- 下拉组件 -->
-                    <v-selection :selections="buyTypes" @on-change=""></v-selection>
+                    <v-selection :selections="buyTypes" @on-change="onParamChange('buyType', $event)"></v-selection>
                 </div>
             </div>
             <div class="sales-board-line">
@@ -28,7 +28,7 @@
                 </div>
                 <div class="sales-board-line-right">
                     <!-- 列表选择 -->
-                    <v-chooser :selections="periodList" @on-change=""></v-chooser>
+                    <v-chooser :selections="periodList" @on-change="onParamChange('period', $event)"></v-chooser>
                 </div>
             </div>
             <div class="sales-board-line">
@@ -36,7 +36,7 @@
                     产品版本：
                 </div>
                 <div class="sales-board-line-right">
-                    <v-mul-chooser :selections="versionList" @on-change=""></v-mul-chooser>
+                    <v-mul-chooser :selections="versionList" @on-change="onParamChange('versions', $event)"></v-mul-chooser>
                 </div>
             </div>
             <div class="sales-board-line">
@@ -44,13 +44,13 @@
                     总价：
                 </div>
                 <div class="sales-board-line-right">
-                    500元
+                    {{ price }} 元
                 </div>
             </div>
             <div class="sales-board-line">
                 <div class="sales-board-line-left">&nbsp;</div>
                 <div class="sales-board-line-right">
-                    <div class="button">
+                    <div class="button" @click="showPayDialog">
                         立即购买
                     </div>
                 </div>
@@ -78,8 +78,9 @@
                 <li>用户所在地理区域分布状况等</li>
             </ul>
         </div>
-
-        <!-- <my-dialog :is-show="isShowPayDialog" @on-close="hidePayDialog">
+        
+        <!-- 选中银行 -->
+        <my-dialog :is-show="isShowPayDialog" @on-close="hidePayDialog">
             <table class="buy-dialog-table">
                 <tr>
                     <th>购买数量</th>
@@ -104,13 +105,15 @@
             <div class="button buy-dialog-btn" @click="confirmBuy">
                 确认购买
             </div>
-        </my-dialog>-->
-
-        <!--<my-dialog :is-show="isShowErrDialog" @on-close="hideErrDialog">
+        </my-dialog>
+        
+        <!-- 支付失败提示 -->
+        <my-dialog :is-show="isShowErrDialog" @on-close="hideErrDialog">
             支付失败！
-        </my-dialog> -->    
-
-        <!-- <check-order :is-show-check-dialog="isShowCheckOrder" :order-id="orderId" @on-close-check-dialog="hideCheckOrder"></check-order> -->
+        </my-dialog>     
+        
+        <!-- 支付状态选中 -->
+        <check-order :is-show-check-dialog="isShowCheckOrder" :order-id="orderId" @on-close-check-dialog="hideCheckOrder"></check-order>
     </div>
 </template>
 
@@ -120,16 +123,36 @@
     import VChooser from '../../components/chooser'      //列表单选组件
     import VMulChooser from '../../components/multiplyChooser'    //多选
     import VCounter from '../../components/counter'     //商品数量加减
+    import _ from 'lodash'     //工具集
+    import Dialog from '../../components/dialog'    //对话框组件
+    import BankChooser from '../../components/bankChooser'   //银行列表
+    import CheckOrder from '../../components/checkOrder'    //支付状态组件
 
     export default {
         components : {
             VSelection,
             VChooser,
             VMulChooser,
-            VCounter
+            VCounter,
+            BankChooser,
+            CheckOrder,
+            myDialog : Dialog
+        },
+        // 页面初始化
+        mounted (){
+            this.buyNum = 1
+            this.buyType = this.buyTypes[0]
+            this.versions = [this.versionList[0]]
+            this.period = this.periodList[0]
+            this.getPrice()
         },
         data () {
             return {
+                buyNum : 0,
+                buyType : {},
+                versions : [],
+                period : {},
+                price : 0,
                 buyTypes: [                 //下拉选择
                     {
                         label: '入门版',
@@ -171,13 +194,96 @@
                         label: '专家版',
                         value: 2
                     }
-                ]
+                ],
+                isShowPayDialog : false,
+                bankId : null,     //选中的银行id
+                orderId : null,     //支付成功创建的订单ID
+                isShowCheckOrder : false,   //支付状态，成功或者失败
+                isShowErrDialog : false   //错误提示信息
+            }
+        },
+        methods : {
+            // 关闭支付失败提示
+            hideErrDialog (){
+                this.isShowErrDialog = false
+            },
+
+            // 关闭支付状态选择对话框
+            hideCheckOrder (){
+                this.isShowCheckOrder = false;
+            },
+
+            // 确认购买
+            confirmBuy (){
+
+                // 获取多选选中的值
+                let buyVersionsArray = _.map(this.versions, (item) => {
+                    return item.value
+                })
+                // 请求参数
+                let reqParams = {
+                    buyNumber: this.buyNum,
+                    buyType: this.buyType.value,
+                    period: this.period.value,
+                    version: buyVersionsArray.join(','),
+                    bankId: this.bankId
+                }
+
+                // 请求支付购买
+                this.$http.post('/api/createOrder', reqParams).then((res) => {
+                    this.orderId = res.data.orderId
+                    this.isShowCheckOrder = true
+                    this.isShowPayDialog = false
+                }, (err) => {
+                    this.isShowErrDialog = true
+                })
+            },
+
+            // 银行列表,选中的银行
+            onChangeBanks (bankObj){
+                this.bankId = bankObj.id      
+            },
+
+            // 隐藏支付对话框
+            hidePayDialog (){
+                this.isShowPayDialog = false
+            },
+
+            // 出现支付对话框
+            showPayDialog () {
+              this.isShowPayDialog = true
+            },
+
+            // 数值变化事件
+            onParamChange (attr, val){
+                this[attr] = val
+                this.getPrice()
+            },
+
+            // 获取价格
+            getPrice (){
+
+                // 获取多选参数
+                let buyVersionsArray = _.map(this.versions, (item) => {
+                    return item.value
+                })
+
+                // 请求价格的请求参数
+                let reqParams = {
+                    buyNumber: this.buyNum,
+                    buyType: this.buyType.value,
+                    period: this.period.value,
+                    version: buyVersionsArray.join(',')
+                }
+
+                // 像后台请求返回的参数
+                this.$http.post('/api/getPrice', reqParams).then((res) => {
+                    this.price = res.data.amount
+                })
             }
         }
     }
-
 </script>
-
 
 <style scoped>
     .buy-dialog-title {
