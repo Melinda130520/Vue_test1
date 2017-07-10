@@ -1,12 +1,13 @@
+<!-- 下拉选择 -->
 <template>
     <div class="selection-component">
-        <div class="selection-show" >
-            <span></span>
+        <div class="selection-show" @click="toggleDrop">
+            <span>{{ selections[nowIndex].label }}</span>
             <div class="arrow"></div>
         </div>
         <div class="selection-list" v-if="isDrop">
             <ul>
-                <li> </li>
+                <li v-for="(item, index) in selections" @click="chooseSelection(index)"> {{ item.label }} </li>
             </ul>
         </div>
     </div>
@@ -14,10 +15,31 @@
 
 <script>
     export default {
+        props : {
+            selections : {                         //从父组件中获取参数
+                type : Array,
+                default : [                        //默认值
+                    {
+                        label: '选择类型',
+                        value: 0
+                    }
+                ]
+            }
+        },
         data () {
             return {
-                isDrop: false,
-                nowIndex: 0
+                nowIndex : 0,                      //当前选中的索引项
+                isDrop : false                     //下拉隐藏
+            }
+        },
+        methods : {
+            toggleDrop (){                         //切换下拉选项的显示隐藏
+                this.isDrop = !this.isDrop
+            },
+            chooseSelection (index){               //选中
+                this.nowIndex = index
+                this.isDrop = false
+                this.$emit('on-change', this.selections[this.nowIndex])
             }
         }
     }
@@ -38,6 +60,7 @@
         line-height: 25px;
         border-radius: 3px;
         background: #fff;
+        /*width: 200px;*/
     }
     .selection-show .arrow {
         display: inline-block;

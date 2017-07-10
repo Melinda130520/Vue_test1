@@ -10,7 +10,7 @@
                     购买数量：
                 </div>
                 <div class="sales-board-line-right">
-                    <!-- <v-counter @on-change="onParamChange('buyNum', $event)"></v-counter> -->
+                    <v-counter @on-change=""></v-counter>
                 </div>
             </div>
             <div class="sales-board-line">
@@ -18,7 +18,8 @@
                     产品类型：
                 </div>
                 <div class="sales-board-line-right">
-                    <!-- <v-selection :selections="buyTypes" @on-change="onParamChange('buyType', $event)"></v-selection> -->
+                    <!-- 下拉组件 -->
+                    <v-selection :selections="buyTypes" @on-change=""></v-selection>
                 </div>
             </div>
             <div class="sales-board-line">
@@ -26,7 +27,8 @@
                     有效时间：
                 </div>
                 <div class="sales-board-line-right">
-                    <!-- <v-chooser :selections="periodList" @on-change="onParamChange('period', $event)"></v-chooser> -->
+                    <!-- 列表选择 -->
+                    <v-chooser :selections="periodList" @on-change=""></v-chooser>
                 </div>
             </div>
             <div class="sales-board-line">
@@ -34,7 +36,7 @@
                     产品版本：
                 </div>
                 <div class="sales-board-line-right">
-                    <!-- <v-mul-chooser :selections="versionList" @on-change="onParamChange('versions', $event)"></v-mul-chooser> -->
+                    <v-mul-chooser :selections="versionList" @on-change=""></v-mul-chooser>
                 </div>
             </div>
             <div class="sales-board-line">
@@ -114,17 +116,69 @@
 
 <script>
 
+    import VSelection from '../../components/selection'        //下拉组件
+    import VChooser from '../../components/chooser'      //列表单选组件
+    import VMulChooser from '../../components/multiplyChooser'    //多选
+    import VCounter from '../../components/counter'     //商品数量加减
+
     export default {
+        components : {
+            VSelection,
+            VChooser,
+            VMulChooser,
+            VCounter
+        },
         data () {
             return {
-          
+                buyTypes: [                 //下拉选择
+                    {
+                        label: '入门版',
+                        value: 0
+                    },
+                    {
+                        label: '中级版',
+                        value: 1
+                    },
+                    {
+                        label: '高级版',
+                        value: 2
+                    }
+                ],
+                periodList: [     //列表选择
+                    {
+                        label: '半年',
+                        value: 0
+                    },
+                    {
+                        label: '一年',
+                        value: 1
+                    },  
+                    {
+                        label: '三年',
+                        value: 2
+                    }
+                ],
+                versionList: [     //多选
+                    {
+                        label: '客户版',
+                        value: 0
+                    },
+                    {
+                        label: '代理商版',
+                        value: 1
+                    },
+                    {
+                        label: '专家版',
+                        value: 2
+                    }
+                ]
             }
         }
     }
 
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
     .buy-dialog-title {
         font-size: 16px;

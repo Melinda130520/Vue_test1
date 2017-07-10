@@ -48,7 +48,6 @@
               	</div>
           	</div>
       	</div>
-
       	<div class="sales-board-des">
         	<h2>产品说明</h2>
         	<p>历史资料、科学实验、检验、统计等所获得的和用于科学研究、技术设计、查证、决策等的数值加以统计为解决方案做前期准备。</p>
@@ -240,15 +239,23 @@
 	                      	</div>
 	                  	</td>
 	              	</tr>
-	          </tbody>
-	        </table>
-      	</div>
+	        	</tbody>
+	    	</table>
+  		</div>
   	</div>
 </template>
 
 <script>
 
+	import VSelection from '../../components/selection'        //下拉组件
+    import VChooser from '../../components/chooser'      //列表单选组件
+
+
     export default {
+    	components : {
+    		VSelection,
+    		VChooser
+    	},
         data () {
     		return {
 		      	buyTypes: [
