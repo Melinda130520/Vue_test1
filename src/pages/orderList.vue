@@ -20,7 +20,7 @@
 
             <div class="order-list-option">
                 关键词：
-                <!-- 使用lazy表示数据绑定不会同步更新到数据中 -->
+                <!-- 使用lazy表示数据绑定不会同步更新到数据中，这有等输入结束以后才会同步 -->
                 <input type="text" v-model.lazy="query" class="order-query">
             </div>
         </div>
